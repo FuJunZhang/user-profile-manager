@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.danan.upm.mapper.CKMapper">
+    <update id="createTable">
+        create table ${tableName} (
+            user_id String,
+            ${columns}
+        ) engine = MergeTree
+        primary key(user_id)
+        order by (user_id)
+    </update>
+
+    <update id="dropTable">
+        drop table if exists ${tableName}
+    </update>
+
+    <update id="insertToBitmapTable">
+        insert into ${tableName}
+        select tag_code,
+               tag_value,
+               groupBitmapState(user_id),
+               #{doDate}
+        from (
+            select toUInt64(user_id) user_id,
+                   arrayJoin(arr).1 tag_code,
+                   arrayJoin(arr).2 tag_value
+            from (
+                ${subQuery}
+            ) t1
+        ) t2
+        group by tag_code,tag_value
+    </update>
+
+    <update id="deleteBitmapTable">
+        alter table ${tableName} delete where dt = #{doDate}
+    </update>
+</mapper>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.danan.upm.mapper.TagInfoMapper">
+    <select id="getTagInfoInUse" resultType="TagInfo">
+        select tag.*
+        from tag_info tag
+        join task_info task on tag.tag_task_id = task.id
+        where task.task_status = '1'
+    </select>
+
+    <select id="selectTagValuesByTagCode" resultType="TagValue">
+        SELECT * FROM tagcode_tagvalue WHERE tag_code = #{tagCode}
+    </select>
+
+
+</mapper>
