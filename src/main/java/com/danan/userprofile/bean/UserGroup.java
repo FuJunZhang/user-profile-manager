@@ -47,7 +47,7 @@ public class UserGroup implements Serializable {
 
 
     private Date createTime;
-    @TableField(exist = false)
+//    @TableField(exist = false)
     private String busiDate;    //为了方便教学 在页面中可以随意填写业务日期，实际生产应该取当前时间的前一日
 
     //  为了业务人员方便查看 分群的标签条件

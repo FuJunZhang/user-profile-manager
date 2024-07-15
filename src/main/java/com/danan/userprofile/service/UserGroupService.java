@@ -18,6 +18,8 @@ public interface UserGroupService  extends IService<UserGroup> {
 
     Long selectResultFromStarrocks(UserGroup userGroup);
 
+    Long selectResultFromStarrocksById(UserGroup userGroup);
+
     void writeToStarrocks(UserGroup userGroup);
 
 }

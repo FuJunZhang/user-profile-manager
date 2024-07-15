@@ -660,7 +660,7 @@
         "use strict";
         var i = n("4d7F"), a = n.n(i), o = n("vDqi"), r = n.n(o), s = n("XJYT"), c = n("Q2AE"), l = n("X4fA"),
             // u = r.a.create({baseURL: "http://userprofile.camc.com", timeout: 5e5});
-            u = r.a.create({baseURL: "http://10.5.112.223:9001", timeout: 5e5});
+            u = r.a.create({baseURL: "http://user-profile.chinaamc.com:9001", timeout: 5e5});
         u.interceptors.request.use(function (t) {
             return c.a.getters.token && (t.headers.token = Object(l.a)()), t
         }, function (t) {

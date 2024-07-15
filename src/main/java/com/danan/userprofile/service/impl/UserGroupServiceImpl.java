@@ -154,18 +154,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
         return 1L;
     }
 
-//    @Override
-//    public void updateUPResult(String userGroupId, String doDate) {
-//        // 1 获取MySQL中分组元数据
-//        UserGroup userGroup = super.getById(userGroupId);
-//        // 2 更新数据
-//        userGroup.setUpdateTime(new Date());
-//        userGroup.setBusiDate(doDate);
-//        // 3 重新计算写入Clickhouse
-//        writeToClickhouse(userGroup);
-//        // 4 重新计算写入Redis
-////        writeToRedis(userGroup);
-//    }
+
 
     @Override
     public Long selectResultFromStarrocks(UserGroup userGroup) {
@@ -173,6 +162,9 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
         String querySQL = "";
         List<TagCondition> conditions = userGroup.getTagConditions();
         String doDate = userGroup.getBusiDate();
+        System.out.println(conditions);
+        System.out.println(doDate);
+        System.out.println("!!!!");
         if (conditions.size() == 1) {
             // 单个分群条件
             TagCondition tc = conditions.iterator().next();
@@ -187,18 +179,35 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
 
 
     @Override
+    public Long selectResultFromStarrocksById(UserGroup userGroup) {
+        Long id = userGroup.getId();
+        // 1 拼接分群查询语句
+        String querySQL = "select users from acc_inv_user_group_1d where user_group_id="+id;
+        // 2 查询结果
+        return userGroupMapper.selectUPResult(querySQL);
+    }
+
+
+    @Override
     public void updateUPResult(String userGroupId, String doDate) {
         // 1 获取MySQL中分组元数据
         UserGroup userGroup = super.getById(userGroupId);
+
         // 2 更新数据
         userGroup.setUpdateTime(new Date());
         userGroup.setBusiDate(doDate);
+//        super.save(userGroup);
+
 //        // 3 重新计算写入Clickhouse
 //        writeToClickhouse(userGroup);
         // 3 重新计算写入starrocks
         writeToStarrocks(userGroup);
         // 4 重新计算写入Redis
 //        writeToRedis(userGroup);
+        long userGroupNum =  selectResultFromStarrocksById(userGroup);
+        userGroup.setUserGroupNum(userGroupNum);
+        super.saveOrUpdate(userGroup);
+
     }
 
     private String generateMixSQL(List<TagCondition> conditions, String doDate) {
@@ -207,13 +216,6 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
         // 2 填充模板
         String querySQL = "";
         for (int i = 0; i < conditions.size(); i++) {
-//            if (i == 1) {
-//                querySQL = String.format(template,
-//                        generateSingleSQL(conditions.get(0),doDate),
-//                        generateSingleSQL(conditions.get(1),doDate));
-//            } else {
-//                querySQL = String.format(template,querySQL,generateSingleSQL(conditions.get(i),doDate));
-//            }
 
             if (i == 0) {
                 querySQL += generateSingleSQL(conditions.get(i), doDate);
@@ -234,11 +236,6 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
                 querySQL += generateSingleSQL(conditions.get(i), doDate);
                 querySQL = querySQL;
             } else {
-//                querySQL += " and (tag_code = '";
-//                querySQL += conditions.get(i).getTagCode()+"'";
-//                querySQL += " and tag_value = '";
-//                //缺少包含多value的判断代码
-//                querySQL += conditions.get(i).getTagValues().get(0)+"')";
                 querySQL += " union all ";
                 querySQL += generateSingleSQL(conditions.get(i), doDate) ;
             }
@@ -286,7 +283,6 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
         String value = "'" + "1" + "'";
         List<String> values = tc.getTagValues();
 
-        System.out.println(values+"values++++++++");
         if (values.size() == 1) {
             value = values.iterator().next();
             if (!sourceTable.equals(ConstCodes.BITMAP_TABLE_NAME_DECIMAL)){
@@ -311,7 +307,6 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
                             return s;
                         }
                     }).collect(Collectors.joining(",")) + ")";
-            System.out.println(value+"value+++++++++++");
             if (!sourceTable.equals(ConstCodes.BITMAP_TABLE_NAME_DECIMAL)) {
                 if ("in".equals(operator) || "not in".equals(operator)) {
                     return String.format(template2, sourceTable, doDate, tagCode, operator, value);
