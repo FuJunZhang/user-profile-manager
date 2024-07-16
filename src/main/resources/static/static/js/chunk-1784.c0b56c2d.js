@@ -11,6 +11,18 @@
 
 
                     data: function () {
+                        function getYesterdayFormatted() {
+                            let today = new Date();
+                            let yesterday = new Date(today);
+                            yesterday.setDate(today.getDate() - 1);
+
+                            let year = yesterday.getFullYear();
+                            let month = String(yesterday.getMonth() + 1).padStart(2, '0');
+                            let day = String(yesterday.getDate()).padStart(2, '0');
+
+                            return `${year}-${month}-${day}`;
+                        }
+
                         return {
                             // formData 是用于存储表单数据的对象。
                             formData: {
@@ -27,7 +39,7 @@
                                 // userGroupComment: 分群的备注信息。
                                 userGroupComment: "",
                                 // busiDate: 业务日期（用于调试）。
-                                busiDate: "2024-07-01"
+                                busiDate: getYesterdayFormatted()
                             },
                             // userGroupVisible: !1: 控制用户分群对话框的显示状态，初始值为 false。
                             userGroupVisible: !1,

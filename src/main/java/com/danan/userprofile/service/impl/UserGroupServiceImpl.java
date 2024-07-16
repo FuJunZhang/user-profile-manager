@@ -162,9 +162,6 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
         String querySQL = "";
         List<TagCondition> conditions = userGroup.getTagConditions();
         String doDate = userGroup.getBusiDate();
-        System.out.println(conditions);
-        System.out.println(doDate);
-        System.out.println("!!!!");
         if (conditions.size() == 1) {
             // 单个分群条件
             TagCondition tc = conditions.iterator().next();
